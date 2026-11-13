@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mandala IT - Sistem Pengelolaan Antrean</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* === RESET & VARIABEL === */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      :root {
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --sidebar-bg: #1e1b4b;
+        --sidebar-text: #c7d2fe;
+        --bg-main: #f3f4f6;
+        --bg-white: #ffffff;
+        --text-dark: #111827;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+      }
+
+      body {
+        display: flex;
+        height: 100vh;
+        background-color: var(--bg-main);
+        overflow: hidden;
+      }
+
+      /* === SIDEBAR KIRI === */
+      .sidebar {
+        width: 260px;
+        background-color: var(--sidebar-bg);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        flex-shrink: 0;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        padding: 0 24px 20px 24px;
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .logo-area span {
+        margin-right: 10px;
+        font-size: 24px;
+      }
+
+      .menu-list {
+        list-style: none;
+        flex-grow: 1;
+      }
+
+      .menu-item {
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        color: var(--sidebar-text);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.2s;
+        cursor: pointer;
+      }
+
+      .menu-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+
+      .menu-item.active {
+        background-color: var(--primary);
+        color: white;
+        border-left: 4px solid #a5b4fc;
+      }
+
+      .menu-item i {
+        margin-right: 12px;
+        font-size: 18px;
+      }
+
+      .bottom-menu {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 10px;
+      }
+
+      /* === MAIN CONTENT (KANAN) === */
+      .main-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      /* === TOP BAR === */
+      .topbar {
+        height: 64px;
+        background-color: var(--bg-white);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 32px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .breadcrumb {
+        font-size: 14px;
+        color: var(--text-gray);
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+
+      /* === PAGE CONTENT === */
+      .page-content {
+        padding: 32px;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .page-header {
+        margin-bottom: 24px;
+      }
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+      }
+
+      .page-subtitle {
+        font-size: 14px;
+        color: var(--text-gray);
+      }
+
+      /* === TABEL DATA === */
+      .toolbar {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .search-box {
+        flex-grow: 1;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+      }
+
+      .search-box:focus {
+        border-color: var(--primary);
+      }
+
+      .btn-filter {
+        padding: 10px 16px;
+        background-color: var(--bg-white);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      .data-table {
+        width: 100%;
+        background-color: var(--bg-white);
+        border-radius: 12px;
+        border-collapse: collapse;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+      }
+
+      .data-table th {
+        background-color: #f9fafb;
+        font-weight: 600;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      .data-table tr:hover {
+        background-color: #f9fafb;
+      }
+
+      .app-name {
+        font-weight: 600;
+        color: var(--text-dark);
+        display: block;
+      }
+      .unit-name {
+        font-size: 12px;
+        color: var(--text-gray);
+        margin-top: 4px;
+        display: block;
+      }
+
+      /* BADGES (Pill) */
+      .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .badge-warning {
+        background-color: #fef3c7;
+        color: #b45309;
+      }
+      .badge-danger {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+      .badge-success {
+        background-color: #d1fae5;
+        color: #047857;
+      }
+
+      /* BUTTONS */
+      .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: 0.2s;
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dark);
+      }
+
+      .btn-outline:hover {
+        background-color: #f3f4f6;
+        border-color: #d1d5db;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-hover);
+      }
+
+      /* === FORM LAYOUT (2 KOLOM) === */
+      .form-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+      }
+
+      .card {
+        background-color: var(--bg-white);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+      }
+
+      .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+        font-family: inherit;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary);
+      }
+      textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .radio-group {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+      }
+
+      .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+      }
+
+      /* Sembunyikan halaman form secara default */
+      #form-page {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo-area"><span>🏛️</span> MANDALA IT</div>
+      <ul class="menu-list">
+        <a href="#" class="menu-item"> <i>🏠</i> Dashboard </a>
+        <a href="#" class="menu-item active" onclick="showPage('table-page')">
+          <i>📥</i> Daftar Pengajuan
+        </a>
+        <a href="#" class="menu-item"> <i>✅</i> Riwayat Review </a>
+        <a href="#" class="menu-item"> <i>💬</i> Catatan Revisi </a>
+      </ul>
+      <div class="bottom-menu">
+        <a href="#" class="menu-item"> <i>👤</i> Profil </a>
+        <a href="#" class="menu-item"> <i>🚪</i> Keluar </a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="breadcrumb">
+          Beranda >
+          <span
+            id="breadcrumb-text"
+            style="font-weight: 600; color: var(--text-dark)"
+            >Daftar Pengajuan</span
+          >
+        </div>
+        <div class="user-profile">
+          <span>🔔</span>
+          <div class="avatar">A</div>
+          <span>Tim Analis (Andi) ▼</span>
+        </div>
+      </header>
+
+      <!-- PAGE 1: TABEL DATA -->
+      <div class="page-content" id="table-page">
+        <div class="page-header">
+          <h1 class="page-title">Daftar Pengajuan Masuk</h1>
+          <p class="page-subtitle">
+            Berikut adalah daftar pengajuan aplikasi yang membutuhkan
+            pemeriksaan Anda.
+          </p>
+        </div>
+
+        <div class="toolbar">
+          <input
+            type="text"
+            class="search-box"
+            placeholder="Cari nama aplikasi atau unit..."
+          />
+          <button class="btn-filter">Filter Status ▼</button>
+          <button class="btn-filter">Filter Prioritas ▼</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Aplikasi & Unit</th>
+              <th>Tanggal</th>
+              <th>Prioritas</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>
+                <span class="app-name">Sistem Informasi Akademik</span>
+                <span class="unit-name">Fakultas Teknik</span>
+              </td>
+              <td>10 Jun 2025</td>
+              <td><span class="badge badge-danger">🔴 High</span></td>
+              <td>
+                <span class="badge badge-warning">⏳ Menunggu Review</span>
+              </td>
+              <td>
+                <button class="btn btn-outline" onclick="showPage('form-page')">
+                  Lihat Detail
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>
+                <span class="app-name">Aplikasi Absensi Dosen</span>
+                <span class="unit-name">Fakultas Ekonomi</span>
+              </td>
+              <td>9 Jun 2025</td>
+              <td><span class="badge badge-warning">🟡 Medium</span></td>
+              <td>
+                <span class="badge badge-warning">⏳ Menunggu Review</span>
+              </td>
+              <td><button class="btn btn-outline">Lihat Detail</button></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>
+                <span class="app-name">Sistem Perpustakaan</span>
+                <span class="unit-name">Perpustakaan Pusat</span>
+              </td>
+              <td>8 Jun 2025</td>
+              <td><span class="badge badge-success">🟢 Low</span></td>
+              <td>
+                <span class="badge badge-warning">⏳ Menunggu Review</span>
+              </td>
+              <td><button class="btn btn-outline">Lihat Detail</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGE 2: FORM EVALUASI -->
+      <div class="page-content" id="form-page">
+        <div
+          class="page-header"
+          style="display: flex; align-items: center; gap: 16px"
+        >
+          <button class="btn btn-outline" onclick="showPage('table-page')">
+            ← Kembali
+          </button>
+          <div>
+            <h1 class="page-title">
+              Review Pengajuan: Sistem Informasi Akademik
+            </h1>
+            <p class="page-subtitle">
+              Silakan periksa detail dan berikan keputusan Anda.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-layout">
+          <!-- KOLOM KIRI -->
+          <div class="left-col">
+            <div class="card">
+              <h3 class="card-title">Informasi Pengajuan</h3>
+              <div class="form-group">
+                <label class="form-label">Pemohon</label>
+                <div style="font-size: 14px">
+                  Fakultas Teknik (PIC: Rudi Hermawan)
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Deskripsi Kebutuhan</label>
+                <div
+                  style="
+                    font-size: 14px;
+                    background: #f9fafb;
+                    padding: 12px;
+                    border-radius: 6px;
+                    border: 1px solid var(--border);
+                  "
+                >
+                  Mempermudah proses pengisian KRS dan input nilai mahasiswa
+                  secara terintegrasi.
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dokumen Lampiran</label>
+                <div style="display: flex; gap: 12px; margin-top: 8px">
+                  <button class="btn btn-outline">
+                    📄 Surat_Permohonan_SIAKAD.pdf
+                  </button>
+                  <button class="btn btn-outline">
+                    📊 Flowchart_Proses_KRS.png
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="card-title">Form Evaluasi (Input Analis)</h3>
+
+              <div class="form-group">
+                <label class="form-label">Aspek Kelengkapan Dokumen</label>
+                <div class="radio-group">
+                  <label class="radio-label"
+                    ><input type="radio" name="kelengkapan" checked />
+                    Sesuai</label
+                  >
+                  <label class="radio-label"
+                    ><input type="radio" name="kelengkapan" /> Belum
+                    Sesuai</label
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label"
+                  >Catatan Revisi (Wajib jika status Perlu Revisi)</label
+                >
+                <textarea
+                  class="form-control"
+                  placeholder="Ketik catatan revisi atau aspek yang perlu diperbaiki..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label"
+                  >Unggah Anotasi Dokumen (Opsional)</label
+                >
+                <div
+                  style="
+                    border: 2px dashed var(--border);
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 8px;
+                    color: var(--text-gray);
+                    cursor: pointer;
+                  "
+                >
+                  📁 Klik untuk memilih file atau tarik file ke sini (Max 10MB)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KOLOM KANAN -->
+          <div class="right-col">
+            <div class="card">
+              <h3 class="card-title">Keputusan Akhir</h3>
+
+              <div class="form-group">
+                <label class="form-label">Rekomendasi Urgensi</label>
+                <select class="form-control">
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Status Setelah Review</label>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-top: 8px;
+                  "
+                >
+                  <label class="radio-label"
+                    ><input type="radio" name="status" checked /> 🔄 Perlu
+                    Revisi</label
+                  >
+                  <label class="radio-label"
+                    ><input type="radio" name="status" /> ✅ Siap
+                    Dikerjakan</label
+                  >
+                  <label class="radio-label"
+                    ><input type="radio" name="status" /> ❌ Tolak
+                    Pengajuan</label
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOMBOL AKSI FORM -->
+        <div
+          class="action-buttons"
+          style="
+            background: var(--bg-white);
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+          "
+        >
+          <button class="btn btn-outline" onclick="showPage('table-page')">
+            Batal
+          </button>
+          <button
+            class="btn btn-primary"
+            onclick="alert('Review berhasil disimpan!')"
+          >
+            Simpan & Kirim Review
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- JAVASCRIPT UNTUK NAVIGASI SEDERHANA -->
+    <script>
+      function showPage(pageId) {
+        // Sembunyikan semua halaman
+        document.getElementById("table-page").style.display = "none";
+        document.getElementById("form-page").style.display = "none";
+
+        // Tampilkan halaman yang dipilih
+        document.getElementById(pageId).style.display = "block";
+
+        // Ubah teks breadcrumb
+        if (pageId === "form-page") {
+          document.getElementById("breadcrumb-text").innerText =
+            "Review Pengajuan";
+        } else {
+          document.getElementById("breadcrumb-text").innerText =
+            "Daftar Pengajuan";
+        }
+      }
+    </script>
+  </body>
+</html>
